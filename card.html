@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Κάρτα Αρχαιολόγου — Εκτύπωση</title>
+    <meta name="description" content="Εκτυπώσιμη κάρτα ερωτήσεων για το Κάστρο Καλλιθέας — Δήμος Φαρσάλων">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="worksheet-page">
+
+    <div class="toolbar no-print">
+        <span class="toolbar-text">
+            <i class="fas fa-print"></i> A4 — 2 σελίδες ανά μαθητή
+        </span>
+        <button class="btn-toolbar" type="button" onclick="window.print()">
+            <i class="fas fa-print"></i> Εκτύπωση
+        </button>
+        <a id="presLink" href="presentation.html?level=1" class="btn-toolbar secondary">
+            <i class="fas fa-play"></i> Παρουσίαση
+        </a>
+        <a href="index.html" class="btn-toolbar secondary">
+            <i class="fas fa-arrow-left"></i> Πίσω
+        </a>
+    </div>
+
+    <div class="sheet sheet-questions" id="sheetQuestions"></div>
+    <div class="sheet sheet-rewards" id="sheetRewards"></div>
+
+    <script src="data.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            const params = new URLSearchParams(window.location.search);
+            const level = parseInt(params.get('level')) || 1;
+            const data = (typeof QUIZ_LEVELS !== 'undefined') ? QUIZ_LEVELS[level] : null;
+
+            if (!data) {
+                document.getElementById('sheetQuestions').innerHTML = `
+                    <div style="padding: 40px; text-align: center; font-family: sans-serif;">
+                        <h2 style="color: #b91c1c;">⚠️ Σφάλμα φόρτωσης</h2>
+                        <p>Δεν βρέθηκε το επίπεδο <strong>${level}</strong>.</p>
+                        <a href="index.html" style="color: #3568d4;">← Πίσω στην αρχική</a>
+                    </div>
+                `;
+                document.getElementById('sheetRewards').style.display = 'none';
+                return;
+            }
+
+            const title    = data.cardTitle  || data.name || "Κάρτα Αρχαιολόγου";
+            const numeral  = data.numeral    || data.id   || level;
+            const subtitle = data.subtitle   || "";
+            const accent   = data.accentColorDeep || data.colorDark || "#d4af37";
+
+            document.getElementById('presLink').href = `presentation.html?level=${level}`;
+            document.documentElement.style.setProperty('--sheet-accent', accent);
+
+            // Auto-density ανάλογα με πλήθος ερωτήσεων
+            if (data.questions.length >= 8) {
+                document.body.classList.add('compact');
+            }
+            if (data.questions.length >= 10) {
+                document.body.classList.add('print-tight');
+            }
+
+            const letters = ['Α', 'Β', 'Γ', 'Δ'];
+
+            const questionsHTML = data.questions.map((q, i) => `
+                <div class="question-item">
+                    <span class="q-number">${i + 1}</span>
+                    <div class="q-body">
+                        <p class="q-text">${q.q}</p>
+                        <div class="q-options">
+                            ${q.options.map((opt, j) => `
+                                <div class="q-option">
+                                    <span class="opt-circle">${letters[j]}</span>
+                                    <span>${opt.t}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            document.getElementById('sheetQuestions').innerHTML = `
+                <header class="card-header">
+                    <div class="card-crest">
+                        <i class="fas fa-landmark"></i>
+                    </div>
+                    <h1 class="card-title">${title}</h1>
+                    <p class="card-subtitle">Δήμος Φαρσάλων · 2026</p>
+                    <span class="card-level-badge">
+                        <i class="fas fa-graduation-cap"></i>
+                        Επίπεδο ${numeral} · ${subtitle}
+                    </span>
+                    <div class="card-divider">
+                        <span class="diamond">◆</span>
+                    </div>
+                </header>
+
+                <div class="student-fields">
+                    <div class="field">
+                        <span class="label">Όνομα:</span>
+                        <span class="line"></span>
+                    </div>
+                    <div class="field" style="flex: 0 0 30mm;">
+                        <span class="label">Τάξη:</span>
+                        <span class="line"></span>
+                    </div>
+                    <div class="field" style="flex: 0 0 38mm;">
+                        <span class="label">Ημ/νία:</span>
+                        <span class="line"></span>
+                    </div>
+                </div>
+
+                <div class="questions-block">
+                    ${questionsHTML}
+                </div>
+
+                <footer class="sheet-footer">
+                    <span class="page-indicator">Σελίδα 1 / 2</span>
+                    <span class="footer-hint"><i class="fas fa-arrow-down"></i> Οι ανταμοιβές στην επόμενη σελίδα</span>
+                </footer>
+            `;
+
+            const total = data.questions.length;
+            let rewardsContent = '';
+
+            if (level === 1 || level === 2) {
+                const stickerCount = total;
+                const cols = stickerCount <= 6 ? 3 : 4;
+
+                const stickers = Array.from(
+                    { length: stickerCount },
+                    (_, i) => `
+                        <div class="sticker-slot-large">
+                            <span class="sticker-num">${i + 1}</span>
+                        </div>
+                    `
+                ).join('');
+
+                rewardsContent = `
+                    <div class="rewards-page-header">
+                        <p class="rewards-page-eyebrow">Η ΣΥΛΛΟΓΗ ΜΟΥ</p>
+                        <h2 class="rewards-page-title">Αυτοκόλλητα Ευρημάτων</h2>
+                        <p class="rewards-page-desc">
+                            Κόλλησε ένα αυτοκόλλητο για κάθε σωστή απάντηση!
+                        </p>
+                    </div>
+
+                    <div class="stickers-grid-large" style="--cols: ${cols};">
+                        ${stickers}
+                    </div>
+
+                    <div class="score-banner">
+                        <div class="score-banner-inner">
+                            <span class="score-label">ΤΕΛΙΚΟ ΣΚΟΡ</span>
+                            <span class="score-value">
+                                <span class="score-line"></span>
+                                <span class="score-total">/ ${total}</span>
+                            </span>
+                        </div>
+                    </div>
+                `;
+            }
+            else if (level === 3) {
+                rewardsContent = `
+                    <div class="rewards-page-header">
+                        <p class="rewards-page-eyebrow">ΑΞΙΟΛΟΓΗΣΗ</p>
+                        <h2 class="rewards-page-title">Η Βαθμίδα μου</h2>
+                        <p class="rewards-page-desc">
+                            Κύκλωσε τη βαθμίδα που πέτυχες με βάση το σκορ σου
+                        </p>
+                    </div>
+
+                    <div class="badges-grid-large">
+                        <div class="badge-card">
+                            <div class="badge-icon">
+                                <i class="fas fa-medal"></i>
+                            </div>
+                            <div class="badge-info">
+                                <p class="badge-name">Αργυρός Ερευνητής</p>
+                                <p class="badge-range">${Math.ceil(total*0.3)} – ${Math.ceil(total*0.5)} σωστές</p>
+                            </div>
+                            <div class="badge-check-large"></div>
+                        </div>
+
+                        <div class="badge-card badge-card-gold">
+                            <div class="badge-icon">
+                                <i class="fas fa-award"></i>
+                            </div>
+                            <div class="badge-info">
+                                <p class="badge-name">Χρυσός Ερευνητής</p>
+                                <p class="badge-range">${Math.ceil(total*0.5)+1} – ${Math.ceil(total*0.8)} σωστές</p>
+                            </div>
+                            <div class="badge-check-large"></div>
+                        </div>
+
+                        <div class="badge-card badge-card-platinum">
+                            <div class="badge-icon">
+                                <i class="fas fa-crown"></i>
+                            </div>
+                            <div class="badge-info">
+                                <p class="badge-name">Δάσκαλος Ιστορίας</p>
+                                <p class="badge-range">${Math.ceil(total*0.8)+1} – ${total} σωστές</p>
+                            </div>
+                            <div class="badge-check-large"></div>
+                        </div>
+                    </div>
+
+                    <div class="reflection-section">
+                        <p class="reflection-title">
+                            <i class="fas fa-pen"></i> ΟΙ ΣΗΜΕΙΩΣΕΙΣ ΜΟΥ
+                        </p>
+                        <p class="reflection-prompt">Τι με εντυπωσίασε περισσότερο στο Μουσείο;</p>
+                        <div class="reflection-lines">
+                            <div class="reflection-line"></div>
+                            <div class="reflection-line"></div>
+                            <div class="reflection-line"></div>
+                        </div>
+                    </div>
+
+                    <div class="score-banner">
+                        <div class="score-banner-inner">
+                            <span class="score-label">ΤΕΛΙΚΟ ΣΚΟΡ</span>
+                            <span class="score-value">
+                                <span class="score-line"></span>
+                                <span class="score-total">/ ${total}</span>
+                            </span>
+                        </div>
+                    </div>
+                `;
+            }
+            else {
+                rewardsContent = `
+                    <div class="rewards-page-header">
+                        <p class="rewards-page-eyebrow">ΑΞΙΟΛΟΓΗΣΗ</p>
+                        <h2 class="rewards-page-title">Βεβαίωση Παρακολούθησης</h2>
+                    </div>
+
+                    <div class="certificate-large">
+                        <div class="certificate-seal">
+                            <i class="fas fa-landmark"></i>
+                        </div>
+                        <p class="certificate-header">ΔΗΜΟΣ ΦΑΡΣΑΛΩΝ</p>
+                        <p class="certificate-sub">Αρχαιολογική Συλλογή · Κάστρο Καλλιθέας</p>
+
+                        <div class="certificate-divider">◆</div>
+
+                        <p class="certificate-body">
+                            Ο/Η μαθητής/μαθήτρια που υπογράφει παρακολούθησε
+                            με επιτυχία το εκπαιδευτικό πρόγραμμα
+                        </p>
+
+                        <p class="certificate-title-large">«Το Φύλλο του Μελετητή»</p>
+
+                        <p class="certificate-body">
+                            για την ιστορία και τα αρχαιολογικά ευρήματα
+                            του Κάστρου Καλλιθέας (αρχαία Πεύμα)
+                        </p>
+
+                        <div class="certificate-meta-large">
+                            <div class="cert-meta-item">
+                                <span class="cert-meta-label">Βαθμολογία</span>
+                                <span class="cert-meta-line"></span>
+                                <span class="cert-meta-total">/ ${total}</span>
+                            </div>
+                            <div class="cert-meta-item">
+                                <span class="cert-meta-label">Ημερομηνία</span>
+                                <span class="cert-meta-line"></span>
+                            </div>
+                        </div>
+
+                        <div class="certificate-signature">
+                            <span class="signature-line"></span>
+                            <span class="signature-label">Υπογραφή Υπευθύνου</span>
+                        </div>
+                    </div>
+
+                    <div class="reflection-section">
+                        <p class="reflection-title">
+                            <i class="fas fa-pen"></i> ΠΡΟΣΩΠΙΚΗ ΑΝΑΣΤΟΧΑΣΗ
+                        </p>
+                        <p class="reflection-prompt">Ποιο έκθεμα σας εντυπωσίασε περισσότερο και γιατί;</p>
+                        <div class="reflection-lines">
+                            <div class="reflection-line"></div>
+                            <div class="reflection-line"></div>
+                            <div class="reflection-line"></div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            document.getElementById('sheetRewards').innerHTML = `
+                <header class="rewards-header">
+                    <div class="rewards-header-crest">
+                        <i class="fas fa-landmark"></i>
+                    </div>
+                    <p class="rewards-header-title">${title}</p>
+                    <p class="rewards-header-sub">Δήμος Φαρσάλων · 2026</p>
+                </header>
+
+                <main class="rewards-main">
+                    ${rewardsContent}
+                </main>
+
+                <footer class="sheet-footer">
+                    <span class="page-indicator">Σελίδα 2 / 2</span>
+                    <span class="footer-hint"><i class="fas fa-check"></i> ${subtitle}</span>
+                </footer>
+            `;
+
+            if (window.innerWidth < 900) {
+                document.querySelectorAll('.sheet').forEach(sheet => {
+                    const scale = Math.min(1, (window.innerWidth - 40) / sheet.offsetWidth);
+                    sheet.style.transform = `scale(${scale})`;
+                    sheet.style.transformOrigin = 'top center';
+                    sheet.style.marginBottom = `-${sheet.offsetHeight * (1 - scale)}px`;
+                });
+            }
+        });
+    </script>
+</body>
+</html>

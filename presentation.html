@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Παρουσίαση: Κάρτα Αρχαιολόγου</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="presentation-page">
+
+    <div class="pres-progress">
+        <div class="pres-progress-fill" id="progressFill"></div>
+    </div>
+
+    <header class="pres-header">
+        <div class="pres-brand">
+            <i class="fas fa-landmark"></i> ΔΗΜΟΣ ΦΑΡΣΑΛΩΝ · 2026
+        </div>
+        <div class="pres-level-badge" id="levelBadge"></div>
+        <div class="pres-counter">
+            Ερώτηση <strong id="counterCurrent">0</strong> / <span id="counterTotal">0</span>
+        </div>
+    </header>
+
+    <main class="pres-main">
+        <!-- Sound Toggle -->
+        <button class="sound-toggle" id="soundToggle" type="button" aria-label="Toggle sound">
+            <i class="fas fa-volume-up"></i>
+        </button>
+
+        <!-- Timer -->
+        <div class="pres-timer hidden" id="timerBox">
+            <div class="timer-ring-wrap">
+                <svg viewBox="0 0 50 50">
+                    <circle class="timer-ring-bg" cx="25" cy="25" r="22"/>
+                    <circle class="timer-ring-fill" id="timerRing" cx="25" cy="25" r="22"/>
+                </svg>
+                <div class="timer-number" id="timerNumber">30</div>
+            </div>
+        </div>
+
+        <div id="slidesContainer"></div>
+    </main>
+
+    <footer class="pres-controls">
+        <button class="btn-pres btn-nav-pres" id="btnPrev" disabled>
+            <i class="fas fa-arrow-left"></i> Πίσω
+        </button>
+        <button class="btn-pres btn-reveal" id="btnReveal" disabled>
+            <i class="fas fa-eye"></i> Αποκάλυψη
+        </button>
+        <button class="btn-pres btn-next-pres" id="btnNext">
+            Επόμενη <i class="fas fa-arrow-right"></i>
+        </button>
+    </footer>
+
+    <script src="data.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
